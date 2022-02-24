@@ -433,7 +433,7 @@ val byte_size : int t
 val bi_byte_size : int t
 (** [bi_byte_size] formats a byte size according to its magnitude
     using {{:https://en.wikipedia.org/wiki/Binary_prefix}binary prefixes}
-    up to pebi bytes (2{^15}). *)
+    up to zebi bytes (2{^17}). *)
 
 val uint64_ns_span : int64 t
 (** [uint64_ns_span] formats an {e unsigned} nanosecond time span

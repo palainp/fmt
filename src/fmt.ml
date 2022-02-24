@@ -291,48 +291,27 @@ and si_size ~scale u ppf s = match scale < -8 || scale > 8 with
 let byte_size ppf s = si_size ~scale:0 "B" ppf s
 
 let bi_byte_size ppf s =
-  (* XXX we should get rid of this. *)
-  let _pp_byte_size k i ppf s =
-    let pp_frac = float_dfrac 1 in
-    let div_round_up m n = (m + n - 1) / n in
-    let float = float_of_int in
-    if s < k then pf ppf "%dB" s else
-    let m = k * k in
-    if s < m then begin
-      let kstr = if i = "" then "k" (* SI *) else "K" (* IEC *) in
-      let sk = s / k in
-      if sk < 10
-      then pf ppf "%a%s%sB" pp_frac (float s /. float k) kstr i
-      else pf ppf "%d%s%sB" (div_round_up s k) kstr i
-    end else
-    let g = k * m in
-    if s < g then begin
-      let sm = s / m in
-      if sm < 10
-      then pf ppf "%aM%sB" pp_frac (float s /. float m) i
-      else pf ppf "%dM%sB" (div_round_up s m) i
-    end else
-    let t = k * g in
-    if s < t then begin
-      let sg = s / g in
-      if sg < 10
-      then pf ppf "%aG%sB" pp_frac (float s /. float g) i
-      else pf ppf "%dG%sB" (div_round_up s g) i
-    end else
-    let p = k * t in
-    if s < p then begin
-      let st = s / t in
-      if st < 10
-      then pf ppf "%aT%sB" pp_frac (float s /. float t) i
-      else pf ppf "%dT%sB" (div_round_up s t) i
-    end else begin
-      let sp = s / p in
-      if sp < 10
-      then pf ppf "%aP%sB" pp_frac (float s /. float p) i
-      else pf ppf "%dP%sB" (div_round_up s p) i
-    end
-  in
-  _pp_byte_size 1024 "i" ppf s
+    let unit = [""; "Ki"; "Mi"; "Gi"; "Ti"; "Pi"; "Ei"; "Zi"] in
+    let rec divide ppf s units =
+        match units with
+        | [] -> pf ppf "Error"
+        | h :: t ->
+            let k = 1024 in
+            if abs(s) < k*k then
+                let float = float_of_int in
+                let pp_frac = float_dfrac 1 in
+                let div_round_up m n = (m + n - 1) / n in
+                let sk = s / k in
+                if sk < 10 then begin
+                    pf ppf "%a%sB" pp_frac (float s / float k) h
+                else
+                    pf ppf "%a%sB" (div_round_up s k) h
+                end
+            else begin
+                divide ppf (s/k) t
+            end
+    in
+    divide ppf s unit
 
 (* XXX From 4.08 on use Int64.unsigned_*
 
